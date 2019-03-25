@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const constants = require('../constants')
 
 const orderSchema = new mongoose.Schema({
     user: {
@@ -16,6 +17,10 @@ const orderSchema = new mongoose.Schema({
         required: 'You need to have at least one product'
     },
     price: Number,
+    day: {
+        type: String,
+        enum : constants.DAY_TO_SERVE
+    },
     served: {
         type: Boolean,
         default: false

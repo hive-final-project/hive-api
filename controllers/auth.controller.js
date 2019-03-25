@@ -1,9 +1,8 @@
 const createError = require('http-errors');
 const User = require('../models/user.model');
-const Producer = require('../models/producer.model');
 const passport = require('passport');
 
-module.exports.registerUser = (req, res, next) => {
+module.exports.register = (req, res, next) => {
     const { email } = req.body;
     User.findOne({ email: email })
       .then(user => {
@@ -17,27 +16,46 @@ module.exports.registerUser = (req, res, next) => {
       .catch(next);
 };
 
-module.exports.registerProducer = (req, res, next) => {
-    const { email } = req.body;
-    Producer.findOne({ email: email })
-      .then(producer => {
-        if (producer) {
-          throw createError(409, 'Producer already registered')
-        } else {
-          return new Producer(req.body).save();
-        }
+module.exports.authenticate = (req, res, next) => {
+  passport.authenticate('local-auth', (error, user, message) => {
+    if (error) {
+      next(error);
+    } else if (!user){
+      throw createError(401, message);
+    } else {
+      req.login(user, error => {
+        if (error) {
+          next(error);
+        } else res.status(201).json(user)
       })
-      .then(producer => res.status(201).json(producer))
-      .catch(next);
+    }
+  })(req, res, next);
 };
 
-module.exports.authenticateUser = (req, res, next) => {
+module.exports.getUser = (req, res, next) => {
+  User.findById(req.user.id)
+  .populate('product')
+  .populate('order')
+  .then(user => {
+    if (!user){
+      throw createError(404, 'User not found');
+    } else res.status(202).json(user)
+  })
+  .catch(next);
+};
+
+module.exports.editUser = (req, res, next) => {
+  delete req.body.email;
+  const user = req.user;
   
-};
+  Object.keys(req.body).forEach(prop => user[prop] = req.body[prop]);
 
-module.exports.authenticateProducer = (req, res, next) => {
+  if (req.file) user.imageURL = req.file.secure_url;
 
-};
+  user.save()
+    .then(user => res.status(202).json(user))
+    .catch(next)
+}
 
 module.exports.logout = (req, res, next) => {
     req.logout();

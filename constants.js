@@ -1,4 +1,6 @@
-CATEGORY_CONST: [
+module.exports = {
+    
+    CATEGORY_CONST : [
         {
             id: "veggie",
             name: "Fruits & Vegetables"
@@ -19,5 +21,11 @@ CATEGORY_CONST: [
             id: "butcher",
             name: "Butcher products"
         }
-]
+    ], 
+
+    ROLES : ['USER', 'PRODUCER'],
+
+    DAY_TO_SERVE : ['Monday', 'Tuesday', 'Wednesday', 'Tuesday', 'Friday']
+
+};
 

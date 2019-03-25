@@ -1,12 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/auth.controller');
+const uploader = require('../configs/storage.config');
+const secure = require('../middlewares/secure.middleware');
 
-router.post('/register/user', authController.registerUser);
-router.post('/register/producer', authController.registerProducer);
-router.post('/authenticate/user',authController.authenticateUser);
-router.post('/authenticate/producer',authController.authenticateProducer);
-router.get('/profile', authController.getUser);
+router.post('/register', authController.register);
+router.post('/authenticate',authController.authenticate);
+router.get('/profile', 
+    secure.isAuthenticated,
+    authController.getUser);
+router.put('/profile', 
+    secure.isAuthenticated,
+    uploader.single('attachment'), 
+    authController.editUser);
 router.get('/logout', authController.logout);
 
 module.exports = router;

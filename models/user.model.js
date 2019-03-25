@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const SALT_WORK_FACTOR = 10;
-const Order = require('./order.model')
+const Order = require('./order.model');
+const constants = require('../constants');
+const Product = require('../models/product.model');
 
 const emailRegEx = /(.+)@(.+){2,}\.(.+){2,}/i;
 const passRegEx = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d){8,}/;
@@ -22,20 +24,29 @@ const userSchema = new mongoose.Schema({
         validate: passRegEx
     },
     imageURL: String,
-    street:{
+    address:{
         type: String,
         required: 'A street is required'
     },
-    number:{
+    category:{
+        type: [{
+            type: String,
+            enum: constants.CATEGORY_CONST.map(c => c.id)
+        }],
+    },
+    deliverDay: {
         type: String,
-        required: 'Witch is your street number?'
+        enum: constants.DAYS_TO_SERVE
     },
-    zipCode:{
-        type: Number,
-        required:'Your zip code is required'
+    role:{
+        type: String,
+        enum: constants.ROLES,
+        required: 'You must select a role'
     },
-    other: String
-},{timestamps: true,
+    otherInfo: String
+},{
+    timestamps: true,
+    virtuals: true,
     toJSON: {
         transform: (doc, ret) => {
           ret.id = doc._id;
@@ -50,9 +61,19 @@ const userSchema = new mongoose.Schema({
 userSchema.virtual('orders', {
     ref: Order.modelName,
     localField: '_id',
-    foreignField: 'order',
+    foreignField: 'producer',
+    justOne: false,
     options: { sort: { position: -1 } }
-})
+});
+
+userSchema.virtual('products', {
+    ref: Product.modelName,
+    localField: '_id',
+    foreignField: 'producer',
+    justOne: false,
+    options: { sort: { position: -1 } }
+});
+
 
 userSchema.pre('save', function(next){
     const user = this;

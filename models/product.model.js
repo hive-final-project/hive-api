@@ -4,12 +4,13 @@ const constants = require('../constants');
 const productSchema = new mongoose.Schema({
     producer: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Producer',
+        ref: 'User',
         required: true
     },
     category: {
         type: String,
-        enum: constants.CATEGORY_CONST.map(c => c.id)
+        enum: constants.CATEGORY_CONST.map(c => c.id),
+        required: 'You need to select a category'
     },
     name: {
         type: String,
@@ -20,10 +21,12 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: 'You need to establish a price for the product.'
     },
-    units: {
+    amount: {
         type: Number,
-        required: 'You need to include how many units do you have of the product.'
-    }
+        required: 'You need to include how many units, kg, liters do you have of the product.'
+    },
+    description: String,
+    active: Boolean
 },{
     timestamps: true,
     toJSON: {
@@ -36,8 +39,6 @@ const productSchema = new mongoose.Schema({
     }
 });
 
-['Fruits & Vegetables', 'Milk products', 'Poultry products', 'Apiculture', 'Butcher products']
+const Product = mongoose.model('Product', productSchema);
 
-const Order = mongoose.model('Order', orderSchema);
-
-module.exports = Order;
+module.exports = Product;
