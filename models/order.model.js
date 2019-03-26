@@ -9,7 +9,7 @@ const orderSchema = new mongoose.Schema({
     },
     producer: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Producer',
+        ref: 'User',
         required: true
     },
     products: {

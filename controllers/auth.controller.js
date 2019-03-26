@@ -34,8 +34,8 @@ module.exports.authenticate = (req, res, next) => {
 
 module.exports.getUser = (req, res, next) => {
   User.findById(req.user.id)
-  .populate('product')
-  .populate('order')
+  .populate('products')
+  .populate('orders')
   .then(user => {
     if (!user){
       throw createError(404, 'User not found');

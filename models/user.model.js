@@ -46,8 +46,8 @@ const userSchema = new mongoose.Schema({
     otherInfo: String
 },{
     timestamps: true,
-    virtuals: true,
     toJSON: {
+        virtuals: true,
         transform: (doc, ret) => {
           ret.id = doc._id;
           delete ret._id;
@@ -62,7 +62,6 @@ userSchema.virtual('orders', {
     ref: Order.modelName,
     localField: '_id',
     foreignField: 'producer',
-    justOne: false,
     options: { sort: { position: -1 } }
 });
 
@@ -70,7 +69,6 @@ userSchema.virtual('products', {
     ref: Product.modelName,
     localField: '_id',
     foreignField: 'producer',
-    justOne: false,
     options: { sort: { position: -1 } }
 });
 
