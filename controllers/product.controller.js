@@ -2,27 +2,34 @@ const createError = require('http-errors');
 const Product = require('../models/product.model');
 
 module.exports.newProduct = (req, res, next) => {
-    const { name, producer } = req.body;
+    const user = req.user;
+    const { name } = req.body;
     Product.findOne({ name: name})
-    .populate('producer')
+    .populate('user')
     .then(product => {
-        if (product && producer === product.producer.id){
+        if (product && user === product.user.id){
             throw createError(409,'Product already registered');
-        } else return new Product(req.body).save();
+        } else {
+            const product =  new Product(req.body);
+            product.user = user;
+            if (req.file) product.imageURL = req.file.secure_url;
+            return product.save();
+        }
     })
     .then(product => res.status(201).json(product))
     .catch(next);
 };
 
 module.exports.editProduct = (req, res, next) => {
-    const name = req.body.name;
-    Product.findOne({ name: name })
+    console.log('rec.params', req.params.id)
+    const product = req.params.id;
+    Product.findById(product)
     .then(product => {
         if(!product){
-            throw createError(401, message);
+            throw createError(401, 'No product found.');
         }
         else {
-            if (req.file) user.imageURL = req.file.secure_url;
+            if (req.file) product.imageURL = req.file.secure_url;
             Object.keys(req.body).forEach(prop => product[prop] = req.body[prop]);
             return product.save();               
         }

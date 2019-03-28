@@ -3,13 +3,17 @@ const User = require('../models/user.model');
 const passport = require('passport');
 
 module.exports.register = (req, res, next) => {
-    const { email } = req.body;
+    //const { email, name, password, category, deliverDay, rol, otherInfo } = req.body;
+    const {email} = req.body;
     User.findOne({ email: email })
       .then(user => {
         if (user) {
           throw createError(409, 'User already registered')
         } else {
-          return new User(req.body).save();
+            //const user = new User({ email, name, password, category, deliverDay, rol, otherInfo });
+            const user = new User(req.body);
+            if (req.file) user.imageURL = req.file.secure_url;
+            return user.save();
         }
       })
       .then(user => res.status(201).json(user))
@@ -47,9 +51,9 @@ module.exports.getUser = (req, res, next) => {
 module.exports.editUser = (req, res, next) => {
   delete req.body.email;
   const user = req.user;
-  
+  console.info("edit user", req.body)
   Object.keys(req.body).forEach(prop => user[prop] = req.body[prop]);
-
+  
   if (req.file) user.imageURL = req.file.secure_url;
 
   user.save()

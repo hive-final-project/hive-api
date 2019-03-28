@@ -6,8 +6,9 @@ const secure = require('../middlewares/secure.middleware');
 
 router.post('/new', 
     secure.checkRole('PRODUCER'),
+    uploader.single('attachment'),
     productController.newProduct);
-router.put('/edit',
+router.put('/:id/edit',
     secure.checkRole('PRODUCER'),
     uploader.single('attachment'), 
     productController.editProduct);

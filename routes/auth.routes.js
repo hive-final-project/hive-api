@@ -4,7 +4,9 @@ const authController = require('../controllers/auth.controller');
 const uploader = require('../configs/storage.config');
 const secure = require('../middlewares/secure.middleware');
 
-router.post('/register', authController.register);
+router.post('/register',
+    uploader.single('attachment'), 
+    authController.register);
 router.post('/authenticate',authController.authenticate);
 router.get('/profile', 
     secure.isAuthenticated,

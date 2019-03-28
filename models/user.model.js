@@ -24,9 +24,9 @@ const userSchema = new mongoose.Schema({
         validate: passRegEx
     },
     imageURL: String,
-    address:{
-        type: String,
-        required: 'A street is required'
+    location: {
+        type: {type: String, default: 'Point'},
+        coordinates: [Number]
     },
     category:{
         type: [{
@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema({
     role:{
         type: String,
         enum: constants.ROLES,
-        required: 'You must select a role'
+        default: 'USER'
     },
     otherInfo: String
 },{
@@ -61,17 +61,18 @@ const userSchema = new mongoose.Schema({
 userSchema.virtual('orders', {
     ref: Order.modelName,
     localField: '_id',
-    foreignField: 'producer',
+    foreignField: 'user',
     options: { sort: { position: -1 } }
 });
 
 userSchema.virtual('products', {
     ref: Product.modelName,
     localField: '_id',
-    foreignField: 'producer',
+    foreignField: 'user',
     options: { sort: { position: -1 } }
 });
 
+userSchema.index({location: '2dsphere'});
 
 userSchema.pre('save', function(next){
     const user = this;

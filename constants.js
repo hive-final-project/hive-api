@@ -25,7 +25,8 @@ module.exports = {
 
     ROLES : ['USER', 'PRODUCER'],
 
-    DAY_TO_SERVE : ['Monday', 'Tuesday', 'Wednesday', 'Tuesday', 'Friday']
+    DAY_TO_SERVE : ['Monday', 'Tuesday', 'Wednesday', 'Tuesday', 'Friday'],
 
+    ORDER_STATUS: ['Pending', 'Payed', 'Delivered']
 };
 

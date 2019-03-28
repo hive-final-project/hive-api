@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const constants = require('../constants');
 
 const productSchema = new mongoose.Schema({
-    producer: {
+    user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true

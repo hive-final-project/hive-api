@@ -1,29 +1,26 @@
 const mongoose = require('mongoose');
-const constants = require('../constants')
+const constants = require('../constants');
 
 const orderSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
-    producer: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+        ref: 'User'
     },
     products: {
-        type: [{}],
-        required: 'You need to have at least one product'
+        type: [{
+            product: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Product'
+            },
+            units: Number
+        }],
+        default: []
     },
     price: Number,
-    day: {
-        type: String,
-        enum : constants.DAY_TO_SERVE
-    },
     served: {
-        type: Boolean,
-        default: false
+        type: String,
+        enum: constants.ORDER_STATUS,
+        default: 'Pending'
     }
 },{
     timestamps: true,
