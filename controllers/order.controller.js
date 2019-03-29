@@ -5,25 +5,19 @@ const User = require('../models/user.model');
 
 
 function decreaseProduct(products, next){
-    /**
-     * Revisalo poporsi, que es idea de concepto
-     */
-    products.forEach( product => {
-            // const productFound = await Product.findById(product)
-            // if(productFound - product.units >= 0) {
-            //     productFound.amount -= product.units
-            // }
-            // await productFound.save()
-        Product.findById(product.product)
-        .populate('product')
-        .then(p => {
-            if ((p.amount - product.units) >= 0){
-                p.amount -= product.units;
-                return p.save()
-            } 
+
+    const start = async () => {
+        await asyncForEach(products, async (product) => {
+            const eachProduct = await Product.findById(product.product);
+            if ((eachProduct.amount - product.units) >= 0 ){
+                eachProduct.amount -= product.units;
+                await eachProduct.save()
+            }
+            else throw createError(401, 'Not enougth stock');
         })
-        .catch(next);
-    })   
+    }
+
+    start(); 
 };
 
 module.exports.newOrder = (req, res, next) => {
