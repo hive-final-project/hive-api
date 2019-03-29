@@ -3,7 +3,8 @@ const Order = require('../models/order.model');
 const Product = require('../models/product.model');
 const User = require('../models/user.model');
 
-function decreaseProduct(products){
+
+function decreaseProduct(products, next){
     /**
      * Revisalo poporsi, que es idea de concepto
      */
@@ -74,11 +75,11 @@ module.exports.sendOrder = (req, res, next) => {
     .then(o => {
         if(o.user == req.user.id){
             o.served = 'Payed';
-            decreaseProduct(o.products);
+            decreaseProduct(o.products, next);
             console.log(o)
             return o.save()
             .then(order => {
-                res.status(204).json(order)
+                res.status(201).json(order)
             })
         } else throw createError(401, 'No privileges');
 
@@ -90,51 +91,69 @@ module.exports.getOrder = (req, res, next) => {
     console.log(req.params)
     const order = req.params.id;
     Order.findById(order)
-    .then( order => {
-        if (!order) throw createError(404, 'Order not found');
-        else res.status(204).json(order);
+    .then( o => {
+        if(o.user == req.user.id){
+            res.status(201).json(o)
+        }
     })
     .catch(next);
 }
 
 module.exports.listOrders = (req, res, next) => {
 
-    const orders = [];
-    const producer = req.user.id;
+    const start = async() => {
+        let orders = [];
+        const producer = req.user.id;
+        const allOrders = await Order.find({})
+        console.log('All orders', allOrders);
+        orders = await ordersFilter(allOrders, producer, next);
+        if (orders.length > 0) {
+            console.log('orders de vuelta', orders);
+            return orders;
+        }
+        else throw createError(404, 'No orders found');
+    } 
 
-    Order.find({})
-    .populate('product')
-    .then(o => {
-        orders = ordersFilter(o, producer);
-        res.status(204).json(orders)
-    })
-    .catch(next);
+   start()
+   .then(orders => {
+       res.status(201).json(orders)
+   })
+   .catch(next)
 }
 
-function ordersFilter (orders, producer){
-    const ordersProduct = [];
+function ordersFilter (orders, producer, next){
 
-    orders.forEach(order => {
-        const { user, served }  = order; 
-        const prods = productsFilter(order.products, producer)
-        if (prods.length > 0){
-            ordersProduct.push({user: user, products: prods, served: served})
-        }
-    })
-    return ordersProduct
-} 
-
-function productsFilter (products, producer){
-    const productsProducer = [];
-    products.forEach(product => {
-        Product.findById(product.product)
-        .then (p => {
-            if (p.user == producer){
-                productsProducer.push(p)
-            }
+    const start = async () => {
+        let ordersProduct = [];
+        await asyncForEach(orders, async (order) => {
+            const { user, served }  = order; 
+            const prods = await productsFilter(order.products, producer, next)
+                if (prods.length > 0){
+                    ordersProduct.push({user: user, products: prods, served: served})
+                }
         })
-        .catch(next)
-    })
-    console.log("products of the producer",productsProducer);
-    return productsProducer;
+        return ordersProduct;
+    } 
+    return start();
 } 
+
+function productsFilter (products, producer, next){
+
+    const start =  async () => {
+        let productsProducer = [];
+        await asyncForEach(products, async (product) => {
+        const eachProduct = await Product.findById(product.product)
+                if (eachProduct.user == producer){
+                    productsProducer.push(eachProduct);
+                }
+        })
+        return productsProducer;
+    }
+    return start();
+} 
+
+async function asyncForEach(array, callback) {
+    for (let index = 0; index < array.length; index++) {
+      await callback(array[index], index, array);
+    }
+}

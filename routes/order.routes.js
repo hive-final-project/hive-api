@@ -11,7 +11,7 @@ router.put('/:id/edit',
     secure.checkRole('USER'),
     orderController.editOrder);
 
-router.get(':/id',
+router.get('/:id',
     secure.checkRole('USER'),
     orderController.getOrder);
 
