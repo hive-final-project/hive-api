@@ -12,6 +12,10 @@ router.put('/:id/edit',
     secure.checkRole('PRODUCER'),
     uploader.single('attachment'), 
     productController.editProduct);
+router.get('/:id',
+    productController.getProduct);
+router.get('/products',
+    productController.getAllProducts);
 router.delete('/:id', 
     secure.checkRole('PRODUCER'),
     productController.delete);

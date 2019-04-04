@@ -3,14 +3,12 @@ const User = require('../models/user.model');
 const passport = require('passport');
 
 module.exports.register = (req, res, next) => {
-    //const { email, name, password, category, deliverDay, rol, otherInfo } = req.body;
     const {email} = req.body;
     User.findOne({ email: email })
       .then(user => {
         if (user) {
           throw createError(409, 'User already registered')
         } else {
-            //const user = new User({ email, name, password, category, deliverDay, rol, otherInfo });
             const user = new User(req.body);
             if (req.file) user.imageURL = req.file.secure_url;
             return user.save();

@@ -38,6 +38,34 @@ module.exports.editProduct = (req, res, next) => {
     .catch(next)
 };
 
+module.exports.getProduct = (req, res, next) => {
+    const product = req.params.id;
+    console.log('product', product);
+    Product.findById(product)
+    .then(product => {
+        if(!product){
+            throw createError(401, 'No product found.');
+        }
+        else {
+            res.status(202).json(product)
+        }
+    })
+    .catch(next)
+};
+
+module.exports.getAllProducts = (req, res, next) => {
+    Product.find({})
+    .then(products => {
+        if(!products){
+            throw createError(401, 'No product found.');
+        }
+        else {
+            res.status(202).json(products)
+        }
+    })
+    .catch(next)
+};
+
 module.exports.delete = (req, res, next) => {
     Product.findByIdAndDelete(req.params.id)
     .then(product => {
