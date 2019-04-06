@@ -14,7 +14,7 @@ router.put('/:id/edit',
     productController.editProduct);
 router.get('/:id',
     productController.getProduct);
-router.get('/products',
+router.get('/',
     productController.getAllProducts);
 router.delete('/:id', 
     secure.checkRole('PRODUCER'),
