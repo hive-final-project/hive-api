@@ -52,7 +52,6 @@ module.exports.editOrder = (req, res, next) => {
 };
 
 module.exports.deleteOrder = (req, res, next) => {
-    console.log('req.params.id',req.params.id)
     Order.findByIdAndDelete(req.params.id)
     .then(order => {
       if (!order) throw createError(404, 'Order not found');
@@ -68,7 +67,6 @@ module.exports.sendOrder = (req, res, next) => {
         if(o.user == req.user.id){
             o.served = 'Payed';
             decreaseProduct(o.products, next);
-            console.log(o)
             return o.save()
             .then(order => {
                 res.status(201).json(order)
@@ -80,7 +78,6 @@ module.exports.sendOrder = (req, res, next) => {
 };
 
 module.exports.getOrder = (req, res, next) => {
-    console.log(req.params)
     const order = req.params.id;
     Order.findById(order)
     .then( o => {
@@ -97,10 +94,8 @@ module.exports.listOrders = (req, res, next) => {
         let orders = [];
         const producer = req.user.id;
         const allOrders = await Order.find({})
-        console.log('All orders', allOrders);
         orders = await ordersFilter(allOrders, producer, next);
         if (orders.length > 0) {
-            console.log('orders de vuelta', orders);
             return orders;
         }
         else throw createError(404, 'No orders found');

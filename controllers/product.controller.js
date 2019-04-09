@@ -21,7 +21,6 @@ module.exports.newProduct = (req, res, next) => {
 };
 
 module.exports.editProduct = (req, res, next) => {
-    console.log('rec.params', req.params.id)
     const product = req.params.id;
     Product.findById(product)
     .then(product => {
@@ -40,7 +39,6 @@ module.exports.editProduct = (req, res, next) => {
 
 module.exports.getProduct = (req, res, next) => {
     const product = req.params.id;
-    console.log('product', product);
     Product.findById(product)
     .populate('user')
     .then(product => {
@@ -57,7 +55,6 @@ module.exports.getProduct = (req, res, next) => {
 module.exports.getAllProducts = (req, res, next) => {
     Product.find({})
     .then(p => {
-        console.log('response', p)
         if(!p){
             throw createError(404, 'No product found.');
         }
