@@ -31,7 +31,8 @@ const userSchema = new mongoose.Schema({
     category:{
         type: [{
             type: String,
-            enum: constants.CATEGORY_CONST.map(c => c.id)
+            enum: constants.CATEGORY_CONST.map(c => c.id),
+            default: 'veggie'
         }],
     },
     deliverDay: {
