@@ -7,8 +7,11 @@ router.post('/new',
     secure.checkRole('USER'),
     orderController.newOrder);
 
+router.get('/list',
+    secure.checkRole('PRODUCER'),
+    orderController.listOrders);
+
 router.put('/:id/edit',
-    secure.checkRole('USER'),
     orderController.editOrder);
 
 router.get('/:id',
@@ -23,8 +26,5 @@ router.put('/:id/send',
     secure.checkRole('USER'),
     orderController.sendOrder);
 
-router.get('/list',
-    secure.checkRole('PRODUCER'),
-    orderController.listOrders);
 
 module.exports = router;

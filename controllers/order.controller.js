@@ -21,7 +21,7 @@ function decreaseProduct(products, next){
 module.exports.newOrder = (req, res, next) => {
     const user = req.user.id;
     const { products, price } = req.body;
-
+    console.info('PRODUCTS => ', req.body)
     const order = new Order({
         user: user,
         products: products,
@@ -35,20 +35,11 @@ module.exports.newOrder = (req, res, next) => {
 
 module.exports.editOrder = (req, res, next) => {
     const order = req.params.id; 
-    const { price } = req.body;
-    console.info('req.body', price, {new: true})
-    Order.findById(order)
-    .then(order => {
-        if(!order){
-            throw createError(401, 'No order found matching the selection.');
-        }
-        else {
-            Object.keys(req.body).forEach(prop => order[prop] = req.body[prop]);
-            return order.save();               
-        }
-    })
-    .then(order => res.status(202).json(order))
-    .catch(next)
+    console.info('req.body', req.body)
+    delete req.body.products
+    Order.findByIdAndUpdate(order, req.body, { runValidators: true, new: true })
+        .then(order => res.status(202).json(order))
+        .catch(next)
 };
 
 module.exports.deleteOrder = (req, res, next) => {
@@ -88,14 +79,15 @@ module.exports.getOrder = (req, res, next) => {
     .catch(next);
 }
 
-module.exports.listOrders = (req, res, next) => {
+module.exports.listOrders = async (req, res, next) => {
 
     const start = async() => {
         let orders = [];
         const producer = req.user.id;
         const allOrders = await Order.find({})
-        orders = await ordersFilter(allOrders, producer, next);
-        if (orders.length > 0) {
+        orders = await ordersFilter(allOrders, producer);
+        console.log('orders back', allOrders)
+        if (orders.length) {
             return orders;
         }
         else throw createError(404, 'No orders found');
@@ -108,31 +100,39 @@ module.exports.listOrders = (req, res, next) => {
    .catch(next)
 }
 
-function ordersFilter (orders, producer, next){
-
+const ordersFilter = (orders, producer) => {
+    console.log('filter', orders)
     const start = async () => {
         let ordersProduct = [];
         await asyncForEach(orders, async (order) => {
-            const { user, served }  = order; 
-            const prods = await productsFilter(order.products, producer, next)
-                if (prods.length > 0){
-                    ordersProduct.push({user: user, products: prods, served: served})
-                }
+            const { user, served, id }  = order; 
+            const prods = await productsFilter(order.products, producer)
+            console.log('order', order.products)
+            console.log('prods', prods)
+            if (prods.length){
+                ordersProduct.push({user: user, products: prods, served: served, id: id})
+            }
         })
+        console.log('ordersFilter', ordersProduct)
         return ordersProduct;
     } 
     return start();
 } 
 
-function productsFilter (products, producer, next){
-
-    const start =  async () => {
+const productsFilter = (products, producer) => {
+    const start = async () => {
         let productsProducer = [];
+        console.log('finalProducts', products)
         await asyncForEach(products, async (product) => {
-        const eachProduct = await Product.findById(product.product)
+            try {
+                const eachProduct = await Product.findById(product.product)
+                console.log('eachProduct',eachProduct)
                 if (eachProduct.user == producer){
                     productsProducer.push(eachProduct);
                 }
+            } catch(error) {
+                console.info('ERROR => ', error)
+            }
         })
         return productsProducer;
     }
@@ -143,4 +143,5 @@ async function asyncForEach(array, callback) {
     for (let index = 0; index < array.length; index++) {
       await callback(array[index], index, array);
     }
-}
+  }
+
